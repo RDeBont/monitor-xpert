@@ -1,58 +1,119 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MonitorXpert
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Monitoringsdashboard voor **EcoPower Systems**. Met MonitorXpert volgen medewerkers de energieproductie van de centrales en handelen ze storingen, klantmeldingen, onderhoud en rapportages af.
 
-## About Laravel
+Schoolproject E2 Ontwerpen – Curio, Software Developer niveau 4 – Rowan de Bont.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Techniek
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Onderdeel | Versie |
+|---|---|
+| PHP | 8.4 (minimaal 8.3) |
+| Laravel | 13.x |
+| Livewire | 4.x |
+| MySQL | 8.4 LTS |
+| Lokale server | Laragon 8.7 (Apache 2.4, phpMyAdmin) |
+| Composer | 2.x |
+| Node.js + npm | 24 LTS (Vite) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Project lokaal opzetten
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+1. Clone de repository in `C:\laragon\www`:
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+   git clone https://github.com/RDeBont/monitor-xpert.git
+   cd monitor-xpert
 ```
+2. Installeer de packages:
+```bash
+   composer install
+   npm install
+```
+3. Maak het `.env`-bestand en een app key:
+```bash
+   copy .env.example .env
+   php artisan key:generate
+```
+4. Maak de database aan (Laragon → Start All):
+```bash
+   mysql -u root -e "CREATE DATABASE monitor_xpert CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+5. Tabellen en testdata aanmaken:
+```bash
+   php artisan migrate:fresh --seed
+```
+6. Frontend starten en openen:
+```bash
+   npm run dev
+```
+   Open daarna http://monitor-xpert.test (in Laragon eventueel op *Reload* klikken).
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Testaccounts
 
-## Contributing
+Wachtwoord voor alle accounts: `Welkom123!`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Naam | E-mailadres | Rol |
+|---|---|---|
+| Piet Jansen | piet.technicus@ecopower.test | technicus |
+| Sanne de Wit | sanne.technicus@ecopower.test | technicus |
+| Olga Bakker | olga.manager@ecopower.test | operationeel_manager |
+| Karin Visser | karin.service@ecopower.test | klantenservice |
+| Erik Mulder | erik.ceo@ecopower.test | executief_manager |
+| John Doe | john.doe@example.com | klant (12345) |
+| Jane Smith | jane.smith@example.com | klant (67890) |
 
-## Code of Conduct
+## Database
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+De database volgt het ERD in `docs/ERD_MonitorXpert.png` (19 tabellen).
 
-## Security Vulnerabilities
+| Onderdeel | Tabellen |
+|---|---|
+| Gebruikers | `roles`, `users` |
+| Centrales | `locaties`, `centrales`, `grenswaarden`, `metingen`, `documenten` |
+| Storingen | `storingen`, `storing_technici`, `storing_updates`, `inkomende_mails` |
+| Klanten | `klanten`, `contracten`, `klantmeldingen`, `klantmelding_berichten` |
+| Onderhoud & rapportage | `onderhoudstaken`, `rapporten`, `rapport_gedeeld`, `meldingen` |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Afspraken:
+- Tabelnamen zijn Nederlands, daarom heeft elk model een `$table`.
+- `users` gebruikt `name` en `password` omdat Laravel-authenticatie die kolommen verwacht.
+- Alleen `users` heeft `created_at`/`updated_at`. Tabellen met `aangemaakt_op` vullen die datum automatisch via `CREATED_AT`.
 
-## License
+Vaste waardes (ENUM):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Kolom | Waardes |
+|---|---|
+| `storingen.status`, `klantmeldingen.status` | gemeld, in_behandeling, gepland, uitgevoerd, in_afwachting, opgelost |
+| `storingen.urgentie` | laag, normaal, hoog, urgent |
+| `storingen.type` | stroom, machine, temperatuur, overig |
+| `storingen.grootte` | klein, gemiddeld, groot |
+| `storingen.bron` | technicus, klant, email, sensor |
+| `onderhoudstaken.status` | gepland, in_behandeling, afgerond, geannuleerd |
+| `centrales.status` | actief, storing, onderhoud, buiten_gebruik |
+
+## Ontwerpen
+
+Alle ontwerpdocumenten staan in de map `docs/`:
+
+- User Stories (18 stories met acceptatiecriteria)
+- Testplan (per user story een use case met 5 tests en testdata)
+- ERD
+- Activiteitendiagrammen
+- Ontwikkelomgeving
+
+## Takenbord
+
+De taken staan in het GitHub-project **MonitorXpert takenbord** (tab *Projects*), verdeeld over 5 sprints (milestones):
+
+0. Fundament – setup, migrations, models, seeders, README
+1. Inloggen en beheer
+2. Storingen
+3. Monitoring en onderhoud
+4. Klanten en rapportage
+
+Begin bij de eerste open issue in de laagste sprint. Elke issue heeft acceptatiecriteria als checklist; de bijbehorende tests staan in het Testplan.
+
+## Werkafspraken
+
+- Commit messages in het Engels volgens *Conventional Commits* (`feat:`, `fix:`, `docs:`, `chore:`).
+- Eén issue per branch: `feature/TE-02-storing-melden`.
+- Sluit een issue pas als alle acceptatiecriteria en tests uit het Testplan slagen.
